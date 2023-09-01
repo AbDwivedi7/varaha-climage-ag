@@ -9,10 +9,10 @@ app = FastAPI()
 
 
 # All the Routers
-app.include_router(live.router, tags=["Liveness Probe"]) # Liveness Probe
-app.include_router(users.router, tags=["Users"]) # Liveness Probe
-app.include_router(rooms.router, tags=["Rooms"]) # Liveness Probe
-app.include_router(bookings.router, tags=["Bookings"]) # Liveness Probe
+app.include_router(live.router, tags=["Liveness Probe"]) # Liveness Router
+app.include_router(users.router, tags=["Users"]) # Users Router
+app.include_router(rooms.router, tags=["Rooms"]) # Rooms Router
+app.include_router(bookings.router, tags=["Bookings"]) # Bookings Probe
 
 if __name__ == "__main__":
     # Serving the FastAPI App through uvicorn
