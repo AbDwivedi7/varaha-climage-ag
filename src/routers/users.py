@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from typing import Optional
 
 from crud.auth import (get_current_active_user, authenticate, get_token)
+from crud.users import UsersCollection
 
 router = APIRouter()
 
@@ -11,10 +12,15 @@ router = APIRouter()
     "/user/register",
     dependencies=[Security(get_current_active_user, scopes=["admin:write"])],
 )
-async def register(user: dict):
+async def register(
+    password: str,
+    email: str,
+    name: str,
+    can_write: bool = False
+):
     try:
-        print(user)
-        return True
+        users_collection = UsersCollection()
+        return await users_collection.register(password=password, email=email, name=name, can_write=can_write)
     except Exception as e:
         return e
     
@@ -23,11 +29,11 @@ async def login_user(
     credentials: OAuth2PasswordRequestForm = Depends(),
 ):
     try:
-        user, scopes = await authenticate(credentials)
+        user = await authenticate(credentials)
         if user == False:
             return "User not found or something is wrong"
 
-        access_token = await get_token(user=user, scopes=scopes)
+        access_token = await get_token(user=user)
         return {
             "access_token": access_token, 
             "token_type": "bearer"

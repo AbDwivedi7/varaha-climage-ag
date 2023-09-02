@@ -14,6 +14,8 @@ class OrganizationsCollection:
         }
 
         self.organizations.append(organization)
+        global organization_id_counter
+        organization_id_counter += 1
         return organization
     
     async def get_organization(self, id) -> dict:

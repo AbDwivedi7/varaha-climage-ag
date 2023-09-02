@@ -27,11 +27,10 @@ JWT_SECRET_KEY = "123456789"
 async def authenticate(credentials: OAuth2PasswordRequestForm):
     user = users[credentials.username]
     if not user:
-        return False, False
+        return False
     if credentials.password != user["password"]:
-        return False, False
-    scopes = await get_scope_list(user=user)
-    return user, scopes
+        return False
+    return user
 
 
 async def get_current_user(
@@ -79,55 +78,33 @@ async def get_current_active_user(
 ):
     return current_user if current_user else "Not Found"
 
-
-async def get_user_and_scope(
-    current_user: dict
-):
-    user = users[current_user.username]
-    if not user:
-        return False
-    scopes = await get_scope_list(user=user)
-    return scopes, user
-
-
 async def get_token(
     user: dict,
-    scopes: List
 ):
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={
             "username": user["username"],
-            "scopes": scopes,
+            "scopes": user["permission"],
         },
         expires_delta=access_token_expires,
     )
     return access_token
 
 
-async def get_scope_list(
-    user: dict
-):
-    if user["is_admin"]:
-        scopes = [
-            "admin:read",
-            "admin:write",
-            "guest:read"
-        ]
-    else:
-        scopes = [
-            "user:read",
-            "user:write",
-            "guest:read"
-        ]
-    return scopes
-
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+    expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+
+# async def get_user_and_scope(
+#     current_user: dict
+# ):
+#     user = users[current_user.username]
+#     if not user:
+#         return False
+#     scopes = await get_scope_list(user=user)
+#     return scopes, user
