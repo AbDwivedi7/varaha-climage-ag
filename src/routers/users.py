@@ -43,10 +43,10 @@ async def login_user(
 
 @router.get(
     "/user/me",
-    dependencies=[Security(get_current_active_user, scopes=["guest:read"])],
+    dependencies=[Security(get_current_active_user, scopes=["user:read"])],
 )
 async def read_user_me(
-    current_user = Security(get_current_active_user,scopes=["guest:read"],)
+    current_user = Security(get_current_active_user,scopes=["user:read"],)
 ):
     try:
         return current_user

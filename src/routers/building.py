@@ -1,8 +1,11 @@
 from fastapi import APIRouter, Security
 from typing import Optional
+from datetime import datetime
 
 from crud.auth import (get_current_active_user)
 from crud.building import BuildingCollection
+
+from models.building import BookingTimeSlot
 
 router = APIRouter()
 
@@ -37,7 +40,7 @@ async def add_floor(
 async def add_room(
     floor_number: int,
     room_name: str,
-    capacity: str,
+    capacity: int,
     additional_details: Optional[dict] = None
 ):
     try:
@@ -51,3 +54,37 @@ async def add_room(
     except Exception as e:
         raise e
 
+
+@router.get(
+    "/building/get_conference_rooms",
+    dependencies=[Security(get_current_active_user, scopes=["user:read"])],
+)
+async def get_conference_rooms():
+    try:
+        building_collection = BuildingCollection()
+        return await building_collection.get_conference_rooms()
+    except Exception as e:
+        print("router", e)
+        return e
+
+@router.post(
+    "/building/get_suitable_conference_rooms",
+    dependencies=[Security(get_current_active_user, scopes=["user:read"])],
+)
+async def get_suitable_conference_rooms(
+    capacity: Optional[int] = 0,
+    equipment_available: Optional[dict] = None,
+    start_time: Optional[datetime] = None,
+    end_time: Optional[datetime] = None
+):
+    try:
+        building_collection = BuildingCollection()
+        return await building_collection.get_suitable_conference_rooms(
+            capacity=capacity,
+            equipment_available=equipment_available,
+            start_time=start_time,
+            end_time=end_time
+        )
+    except Exception as e:
+        print("router get_suitable_conference_rooms", e)
+        return e

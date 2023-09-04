@@ -2,9 +2,9 @@ from fastapi import APIRouter
 
 router = APIRouter()
 
-@router.get("/BookingsStart")
-def live():
+@router.get("/booking/book")
+def book():
     try:
-        return "Bookings Are Up"
+        return True
     except Exception as e:
         raise e

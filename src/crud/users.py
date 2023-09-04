@@ -6,7 +6,7 @@ users = {
         "username": "1",
         "email": "abhishekdwivedi131@gmail.com",
         "role": "admin",
-        "permission": ["admin:read", "admin:write", "guest:read"],
+        "permission": ["admin:read","admin:write","user:read","user:write"],
         "name": "Admin",
     },
 }
