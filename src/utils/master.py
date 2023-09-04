@@ -45,7 +45,7 @@ async def check_room_availability(room_id, start_time, end_time):
         end_time = end_time - timedelta(seconds=1)
 
         for booking in bookings:
-            if booking["room_id"] == room_id:
+            if booking["room_id"] == room_id and booking["status"] != "cancelled" :
                 if  (start_time < booking["end_time"] and start_time > booking["start_time"] ) or (end_time < booking["end_time"] and end_time > booking["start_time"] ):
                     return False
         return True
