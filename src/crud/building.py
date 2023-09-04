@@ -90,13 +90,15 @@ class BuildingCollection:
         end_time: Optional[datetime] = None
     ):
         try:
+            print("get_suitable_conference_rooms hrer 1")
             if capacity == 0 and (equipment_available == None or equipment_available == {}) and start_time == None and end_time == None:
-                return self.get_conference_rooms()
+                return await self.get_conference_rooms()
             
             available_rooms = {}
+
             for _, rooms, in building.items():
                 for room in rooms:
-                    if start_time != None and end_time != None and room["capacity"] >= capacity:
+                    if start_time != None and end_time != None and start_time > datetime.now() and end_time > datetime.now() and room["capacity"] >= capacity:
                         is_available = await check_room_availability(room["id"], start_time, end_time)
                         if is_available:
                             available_rooms[room["id"]] = {
@@ -128,5 +130,4 @@ class BuildingCollection:
             
             return available_rooms
         except Exception as e:
-            print(e, "get_suitable_conference_rooms")
             return e

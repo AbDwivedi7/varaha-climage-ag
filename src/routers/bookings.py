@@ -29,3 +29,14 @@ async def book(
         )
     except Exception as e:
         raise e
+
+@router.get(
+    "/booking/get_all_bookings",
+    dependencies=[Security(get_current_active_user, scopes=["admin:read"])],
+)
+async def book():
+    try:
+        bookings_collection = BookingsCollection()
+        return await bookings_collection.get_all_bookings()
+    except Exception as e:
+        return e
