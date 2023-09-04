@@ -35,10 +35,9 @@ async def convert_to_datetime(date_str: str, time_slot: BookingTimeSlot) -> (dat
     return start_time, end_time
 
 
-async def check_room_availability(room_name, start_time, end_time):
+async def check_room_availability(room_id, start_time, end_time):
     for booking in bookings:
-        if booking["room"] == room_name:
-            booking_start, booking_end = await convert_to_datetime(booking["date"], booking["time_slot"])
-            if  start_time < booking_end and end_time > booking_start :
+        if booking["room_id"] == room_id:
+            if  start_time < booking["end_time"] or end_time > booking["start_time"] :
                 return False
     return True

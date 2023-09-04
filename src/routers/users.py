@@ -16,11 +16,12 @@ async def register(
     password: str,
     email: str,
     name: str,
+    organization_id: int,
     can_write: bool = False
 ):
     try:
         users_collection = UsersCollection()
-        return await users_collection.register(password=password, email=email, name=name, can_write=can_write)
+        return await users_collection.register(password=password, email=email, name=name, can_write=can_write, organization_id=organization_id)
     except Exception as e:
         return e
     
@@ -46,7 +47,7 @@ async def login_user(
     dependencies=[Security(get_current_active_user, scopes=["user:read"])],
 )
 async def read_user_me(
-    current_user = Security(get_current_active_user,scopes=["user:read"],)
+    current_user = Security(get_current_active_user,scopes=["user:read"])
 ):
     try:
         return current_user

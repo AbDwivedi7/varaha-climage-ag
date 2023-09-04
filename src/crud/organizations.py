@@ -1,5 +1,5 @@
-organizations = []
-organization_id_counter: int = 1
+organizations = {}
+organization_id_counter: int = 2
 
 class OrganizationsCollection:
     def __init__(self):
@@ -12,18 +12,13 @@ class OrganizationsCollection:
             "id": id,
             "name": name
         }
-
-        self.organizations.append(organization)
+        self.organizations[id] = organization
         global organization_id_counter
         organization_id_counter += 1
         return organization
     
     async def get_organization(self, id) -> dict:
-
-        for org in organizations:
-            if org["id"] == id:
-                return org
-        return None
+        return organizations[id] if id in organizations else None
 
     async def get_organizations(self) -> dict:
         return organizations
