@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from datetime import datetime
+from typing import Optional
 
 from utils.master import convert_to_datetime, check_room_availability, get_date_difference_in_hours
 from utils.data import building
@@ -90,13 +91,40 @@ class BookingsCollection:
     
     async def get_all_organization_bookings(
         self,
-        current_user: dict
+        current_user: dict,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None
     ):
         try:
             all_organization_booking = []
             for booking in bookings:
-                if current_user["organization_id"] == booking["organization_id"]:
-                    all_organization_booking.append(booking)
+                if start_date != None and end_date != None and start_date < end_date:
+                    if current_user["organization_id"] == booking["organization_id"] and booking["start_time"] >= start_date and booking["end_time"] <= end_date:
+                        all_organization_booking.append(booking)
+                else:
+                    if current_user["organization_id"] == booking["organization_id"]:
+                        all_organization_booking.append(booking)
+            
+            return all_organization_booking
+        except Exception:
+            raise HTTPException(status_code=400, detail="Something went wrong")
+    
+    async def get_all_user_bookings(
+        self,
+        username: int,
+        current_user: dict,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None
+    ):
+        try:
+            all_organization_booking = []
+            for booking in bookings:
+                if start_date != None and end_date != None and start_date < end_date:
+                    if current_user["organization_id"] == booking["organization_id"] and booking["start_time"] >= start_date and booking["end_time"] <= end_date and booking["booked_by"] == str(username):
+                        all_organization_booking.append(booking)
+                else:
+                    if current_user["organization_id"] == booking["organization_id"] and booking["booked_by"] == str(username):
+                        all_organization_booking.append(booking)
             
             return all_organization_booking
         except Exception:

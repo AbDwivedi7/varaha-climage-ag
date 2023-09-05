@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Security, Depends
-from fastapi.security import OAuth2PasswordRequestForm
 from datetime import datetime
+from typing import Optional
 
 from crud.auth import (get_current_active_user)
 from crud.bookings import BookingsCollection
@@ -60,11 +60,28 @@ async def cancel_booking(
     dependencies=[Security(get_current_active_user, scopes=["user:write"])]
 )
 async def get_all_organization_bookings(
+    current_user = Security(get_current_active_user,scopes=["user:read"]),
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None
+):
+    try:
+        bookings_collection = BookingsCollection()
+        return await bookings_collection.get_all_organization_bookings(current_user=current_user, start_date=start_date,end_date=end_date)
+    except Exception as e:
+        return e
+
+@router.get(
+    "/booking/get_all_user_bookings",
+    dependencies=[Security(get_current_active_user, scopes=["user:write"])]
+)
+async def get_all_user_bookings(
+    username: int,
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None,
     current_user = Security(get_current_active_user,scopes=["user:read"])
 ):
     try:
         bookings_collection = BookingsCollection()
-        return await bookings_collection.get_all_organization_bookings(current_user=current_user)
+        return await bookings_collection.get_all_user_bookings(current_user=current_user, username=username, start_date=start_date, end_date=end_date)
     except Exception as e:
         return e
-
