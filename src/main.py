@@ -2,6 +2,7 @@ import uvicorn
 
 from fastapi import FastAPI
 
+# Importing all the routers
 from routers import ( bookings, building, live, users, organizations )
 
 # Making a FastAPI App

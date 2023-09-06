@@ -7,6 +7,7 @@ from crud.bookings import BookingsCollection
 
 router = APIRouter()
 
+# Route to book a room
 @router.get(
     "/booking/book",
     dependencies=[Security(get_current_active_user, scopes=["user:write"])],
@@ -30,6 +31,7 @@ async def book(
     except Exception as e:
         raise e
 
+# Admin route to get all the bookings
 @router.get(
     "/booking/get_all_bookings",
     dependencies=[Security(get_current_active_user, scopes=["admin:read"])],
@@ -39,8 +41,9 @@ async def book():
         bookings_collection = BookingsCollection()
         return await bookings_collection.get_all_bookings()
     except Exception as e:
-        return e
+        raise e
 
+# Route to cancel the booking
 @router.get(
     "/booking/cancel_booking",
     dependencies=[Security(get_current_active_user, scopes=["user:write"])]
@@ -53,8 +56,9 @@ async def cancel_booking(
         bookings_collection = BookingsCollection()
         return await bookings_collection.cancel_booking(booking_id=booking_id, current_user=current_user)
     except Exception as e:
-        return e
+        raise e
 
+# Route to get all the for a particular organization
 @router.get(
     "/booking/get_all_organization_bookings",
     dependencies=[Security(get_current_active_user, scopes=["user:write"])]
@@ -68,8 +72,9 @@ async def get_all_organization_bookings(
         bookings_collection = BookingsCollection()
         return await bookings_collection.get_all_organization_bookings(current_user=current_user, start_date=start_date,end_date=end_date)
     except Exception as e:
-        return e
+        raise e
 
+# Route to get all the bookings done by a particular user inside the particular organization or get the bookings by the user for Admin
 @router.get(
     "/booking/get_all_user_bookings",
     dependencies=[Security(get_current_active_user, scopes=["user:write"])]
@@ -84,4 +89,4 @@ async def get_all_user_bookings(
         bookings_collection = BookingsCollection()
         return await bookings_collection.get_all_user_bookings(current_user=current_user, username=username, start_date=start_date, end_date=end_date)
     except Exception as e:
-        return e
+        raise e

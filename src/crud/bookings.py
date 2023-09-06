@@ -23,7 +23,6 @@ class BookingsCollection:
         current_user: dict
     ):
         try:
-            print(room_id, floor_number, start_time, end_time, current_user)
             if start_time < datetime.now() or end_time < datetime.now():
                 return "Cant book in the past"
             for floor, rooms in building.items():
@@ -63,7 +62,7 @@ class BookingsCollection:
 
                             return {"message": "Room booked successfully."}
             return "Not found"
-        except Exception as e:
+        except Exception:
             raise HTTPException(status_code=400, detail="Something went wrong")
     
 
@@ -79,7 +78,7 @@ class BookingsCollection:
         current_user: dict
     ):
         try:
-            for booking in bookings:
+            for booking in self.bookings:
                 if booking["id"] == booking_id and current_user["organization_id"] == booking["organization_id"]:
                     booking["status"] = "cancelled"
                     booking["cancelled_by"] = current_user["username"]
@@ -97,7 +96,7 @@ class BookingsCollection:
     ):
         try:
             all_organization_booking = []
-            for booking in bookings:
+            for booking in self.bookings:
                 if start_date != None and end_date != None and start_date < end_date:
                     if current_user["organization_id"] == booking["organization_id"] and booking["start_time"] >= start_date and booking["end_time"] <= end_date:
                         all_organization_booking.append(booking)
@@ -118,7 +117,7 @@ class BookingsCollection:
     ):
         try:
             all_organization_booking = []
-            for booking in bookings:
+            for booking in self.bookings:
                 if start_date != None and end_date != None and start_date < end_date:
                     if current_user["organization_id"] == booking["organization_id"] and booking["start_time"] >= start_date and booking["end_time"] <= end_date and booking["booked_by"] == str(username):
                         all_organization_booking.append(booking)

@@ -15,8 +15,8 @@ class BuildingCollection:
     async def get_building(self):
         try:
             return self.building
-        except Exception as e:
-            return e
+        except Exception:
+            raise HTTPException(status_code=400, detail="Something went wrong")
        
 
     async def add_floor(self, floor_number):
@@ -25,8 +25,8 @@ class BuildingCollection:
                 self.building[floor_number] = []
                 return f"""{floor_number} floor added"""
             return f"""{floor_number} floor already exists"""
-        except Exception as e:
-            return e
+        except Exception:
+            raise HTTPException(status_code=400, detail="Something went wrong")
 
     async def add_room(self, floor_number, room_name, capacity: int, additional_details=None):
         try:
@@ -49,8 +49,8 @@ class BuildingCollection:
             room_id += 1
 
             return {"floor_number": floor_number, "room_details": room}
-        except Exception as e:
-            return e
+        except Exception:
+            raise HTTPException(status_code=400, detail="Something went wrong")
     
     async def get_conference_rooms(
         self,
@@ -72,7 +72,7 @@ class BuildingCollection:
             stop_time = stop_time.replace(minute=0, second=0, microsecond=0)
             stop_time = stop_time + timedelta(days=time_till)
 
-            for _, rooms, in building.items():
+            for _, rooms, in self.building.items():
                 for room in rooms:
                     available_room_slot = []
                     next_hour_start = current_time + timedelta(hours=1)
@@ -94,8 +94,8 @@ class BuildingCollection:
                 return available_rooms
             else:
                 return {k: available_rooms[k] for k in list(available_rooms)[:2]}
-        except Exception as e:
-            return e
+        except Exception:
+            raise HTTPException(status_code=400, detail="Something went wrong")
 
     
     async def get_suitable_conference_rooms(
@@ -106,7 +106,6 @@ class BuildingCollection:
         end_time: Optional[datetime] = None
     ):
         try:
-            print("get_suitable_conference_rooms hrer 1")
             if capacity == 0 and (equipment_available == None or equipment_available == {}) and start_time == None and end_time == None:
                 return await self.get_conference_rooms()
             
@@ -155,5 +154,5 @@ class BuildingCollection:
                 suggested_room =  await self.get_conference_rooms(start_time=start_time if start_time != None else datetime.now(), time_till=3, max_suggestions=10, capacity=capacity)
                 return {"available_room": {}, "suggested_rooms": suggested_room}
             
-        except Exception as e:
-            return e
+        except Exception:
+            raise HTTPException(status_code=400, detail="Something went wrong")

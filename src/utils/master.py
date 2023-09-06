@@ -4,6 +4,7 @@ from models.building import BookingTimeSlot
 
 from utils.data import bookings
 
+# Function to get relevant user permission
 async def get_scope_list(
     user: dict,
     can_write: bool
@@ -26,19 +27,28 @@ async def get_scope_list(
         ]
     return scopes
 
+#  Function to convert date str plus time slot to Datetime
 async def convert_to_datetime(date_str: str, time_slot: BookingTimeSlot) -> (datetime, datetime):
-    start_time_str = f"{date_str} {time_slot.start_time}:00"
-    end_time_str = f"{date_str} {time_slot.end_time}:00"
-    format_str = "%Y-%m-%d %H:%M"
-    start_time = datetime.strptime(start_time_str, format_str)
-    end_time = datetime.strptime(end_time_str, format_str)
-    return start_time, end_time
+    try:
+        start_time_str = f"{date_str} {time_slot.start_time}:00"
+        end_time_str = f"{date_str} {time_slot.end_time}:00"
+        format_str = "%Y-%m-%d %H:%M"
+        start_time = datetime.strptime(start_time_str, format_str)
+        end_time = datetime.strptime(end_time_str, format_str)
+        return start_time, end_time
+    except Exception as e:
+        raise e
 
+#  Function to calculate number of hours difference between two datetime
 async def get_date_difference_in_hours(start_time: datetime, end_time: datetime) -> int:
-    duration = end_time - start_time
-    duration_in_second = duration.total_seconds()
-    return int(duration_in_second // 3600)
+    try:
+        duration = end_time - start_time
+        duration_in_second = duration.total_seconds()
+        return int(duration_in_second // 3600)
+    except Exception as e:
+        raise e
 
+#  Function to check if particular room is booked for the particular datetime slot
 async def check_room_availability(room_id, start_time, end_time):
     try:
         start_time = start_time + timedelta(seconds=1)
@@ -50,4 +60,4 @@ async def check_room_availability(room_id, start_time, end_time):
                     return False
         return True
     except Exception as e:
-        return e
+        raise e

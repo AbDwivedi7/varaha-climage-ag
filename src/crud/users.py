@@ -1,5 +1,6 @@
-from utils.master import (get_scope_list)
+from fastapi import HTTPException
 
+from utils.master import (get_scope_list)
 from crud.organizations import organizations
 
 users = {
@@ -50,6 +51,6 @@ class UsersCollection:
             username_count += 1
 
             return user
-        except Exception as e:
-            return e
+        except Exception:
+            raise HTTPException(status_code=400, detail="Something went wrong")
 

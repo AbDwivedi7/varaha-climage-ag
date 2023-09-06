@@ -9,6 +9,7 @@ from models.building import BookingTimeSlot
 
 router = APIRouter()
 
+# Route to get the building layout
 @router.get(
     "/building/get_building",
     dependencies=[Security(get_current_active_user, scopes=["admin:read"])],
@@ -20,6 +21,7 @@ async def get_building():
     except Exception as e:
         raise e
 
+# Route to add floor to the building
 @router.get(
     "/building/add_floor",
     dependencies=[Security(get_current_active_user, scopes=["admin:write"])],
@@ -33,6 +35,7 @@ async def add_floor(
     except Exception as e:
         raise e
 
+# Route to add room to a particular floor
 @router.get(
     "/building/add_room",
     dependencies=[Security(get_current_active_user, scopes=["admin:write"])],
@@ -55,6 +58,7 @@ async def add_room(
         raise e
 
 
+#  Route to get all available rooms to next 24 Hours
 @router.get(
     "/building/get_conference_rooms",
     dependencies=[Security(get_current_active_user, scopes=["user:read"])],
@@ -65,8 +69,9 @@ async def get_conference_rooms():
         return await building_collection.get_conference_rooms()
     except Exception as e:
         print("router", e)
-        return e
+        raise e
 
+# Route to get specified rooms for datetime, capacity or suggested rooms
 @router.post(
     "/building/get_suitable_conference_rooms",
     dependencies=[Security(get_current_active_user, scopes=["user:read"])],
@@ -86,5 +91,4 @@ async def get_suitable_conference_rooms(
             end_time=end_time
         )
     except Exception as e:
-        print("router get_suitable_conference_rooms", e)
-        return e
+        raise e
