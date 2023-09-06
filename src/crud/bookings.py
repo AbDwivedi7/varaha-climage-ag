@@ -32,36 +32,39 @@ class BookingsCollection:
                 if floor == floor_number:
                     for room in rooms:
                         if room["id"] == room_id:
-                            month_key = f"""{start_time.month}_{start_time.year}_{current_user["organization_id"]}"""
-
-                            if month_key in self.monthly_booking_hours:
-                                already_booked_hours = self.monthly_booking_hours[month_key]
-                            else:
-                                already_booked_hours = 0
-                            current_booking_hours = await get_date_difference_in_hours(start_time=start_time, end_time=end_time)
-                            if already_booked_hours+current_booking_hours > 30:
-                                return "Cant book for more than 30 hours a month"
-                            
-                            is_available = await check_room_availability(room_id=room_id, start_time=start_time, end_time=end_time)
-                            if not is_available:
-                                return "Already booked"
-                            
-                            booking = {
-                                "id": self.booking_id_count,
-                                "room_id": room_id,
-                                "room_name": room["name"],
-                                "floor_number": floor_number,
-                                "start_time": start_time,
-                                "end_time": end_time,
-                                "booked_by": current_user["username"],
-                                "organization_id": current_user["organization_id"],
-                                "status": "booked"
-                            }
                             with lock:
+                                month_key = f"""{start_time.month}_{start_time.year}_{current_user["organization_id"]}"""
+
+                                if month_key in self.monthly_booking_hours:
+                                    already_booked_hours = self.monthly_booking_hours[month_key]
+                                else:
+                                    already_booked_hours = 0
+                                current_booking_hours = await get_date_difference_in_hours(start_time=start_time, end_time=end_time)
+                                if already_booked_hours+current_booking_hours > 30:
+                                    return "Cant book for more than 30 hours a month"
+                            
+                                is_available = await check_room_availability(room_id=room_id, start_time=start_time, end_time=end_time)
+                                if not is_available:
+                                    return "Already booked"
+                                
+                                booking = {
+                                    "id": self.booking_id_count,
+                                    "room_id": room_id,
+                                    "room_name": room["name"],
+                                    "floor_number": floor_number,
+                                    "start_time": start_time,
+                                    "end_time": end_time,
+                                    "booked_by": current_user["username"],
+                                    "organization_id": current_user["organization_id"],
+                                    "status": "booked"
+                                }
+                                
                                 self.bookings.append(booking)
-                            self.monthly_booking_hours[month_key] = already_booked_hours+current_booking_hours                   
-                            global booking_id_count
-                            booking_id_count += 1
+
+                                self.monthly_booking_hours[month_key] = already_booked_hours+current_booking_hours 
+
+                                global booking_id_count
+                                booking_id_count += 1
 
                             return {"message": "Room booked successfully."}
             return "Not found"
