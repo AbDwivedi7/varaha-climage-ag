@@ -8,22 +8,15 @@ from pydantic import BaseModel, ValidationError
 from typing import List, Optional
 
 from crud.users import (users)
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
-class TokenData(BaseModel):
-    username: Optional[str] = None
-    scopes: List[str] = []
+from models.auth import TokenData
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login")
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 3600
-ALGORITHM = "HS256"
-JWT_SECRET_KEY = "123456789"
+ACCESS_TOKEN_EXPIRE_MINUTES = 3600 # Token Expiration in minutes
+ALGORITHM = "HS256" # Algorithm for encoding/decoding JWT Token
+JWT_SECRET_KEY = "123456789" # Key used for JWS Secret Key for encoding/decoding JWT Token 
 
+# Authenticating user based on username and password
 async def authenticate(credentials: OAuth2PasswordRequestForm):
     user = users[credentials.username]
     if not user:
@@ -33,6 +26,7 @@ async def authenticate(credentials: OAuth2PasswordRequestForm):
     return user
 
 
+# Getting current logged in user
 async def get_current_user(
     security_scopes: SecurityScopes, token: str = Depends(oauth2_scheme)
 ):
@@ -79,11 +73,13 @@ async def get_current_user(
         raise e
 
 
+# Wrapper function to get active user
 async def get_current_active_user(
     current_user= Depends(get_current_user),
 ):
     return current_user if current_user else "Not Found"
 
+# Generating JWT Token
 async def get_token(
     user: dict,
 ):
@@ -98,19 +94,10 @@ async def get_token(
     return access_token
 
 
+# Creating access token
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
-
-
-# async def get_user_and_scope(
-#     current_user: dict
-# ):
-#     user = users[current_user.username]
-#     if not user:
-#         return False
-#     scopes = await get_scope_list(user=user)
-#     return scopes, user

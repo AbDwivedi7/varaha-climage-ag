@@ -13,6 +13,7 @@ class OrganizationsCollection:
         self.organizations = organizations
         self.organizations_count = organization_id_counter
     
+    # Add Organization CRUD
     async def add_organization(self, name) -> dict:
         try:
             id = self.organizations_count
@@ -27,19 +28,22 @@ class OrganizationsCollection:
         except Exception:
             raise HTTPException(status_code=400, detail="Something went wrong")
     
+    # Get Organization By Id CRUD
     async def get_organization(self, id, current_user:dict) -> dict:
         try:
             if id not in self.organizations:
-                return "cant find the organization"
-            elif current_user["organization_id"] == self.organizations[id]["id"] or current_user["role"] == "admin":
+                return "cant find the organization" # If organization does not exits
+            elif current_user["organization_id"] == self.organizations[id]["id"] or current_user["role"] == "admin": # If user is trying to fetch their org or user is admin
                 return self.organizations[id]
             else:
-                return "Cant find the organization"
+                return "Cant find the organization" # If organization does not exits
         except Exception as e:
             raise HTTPException(status_code=400, detail="Something went wrong")
 
+    # Get All Organization CRUD
     async def get_organizations(self) -> dict:
         try:
+            # return all organization
             return self.organizations
         except Exception:
             raise HTTPException(status_code=400, detail="Something went wrong")
