@@ -1,8 +1,12 @@
 from datetime import datetime, timedelta
+import threading
 
 from models.building import BookingTimeSlot
 
 from utils.data import bookings
+
+
+lock = threading.Lock()
 
 # Function to get relevant user permission
 async def get_scope_list(
@@ -53,11 +57,11 @@ async def check_room_availability(room_id, start_time, end_time):
     try:
         start_time = start_time + timedelta(seconds=1)
         end_time = end_time - timedelta(seconds=1)
-
-        for booking in bookings:
-            if booking["room_id"] == room_id and booking["status"] != "cancelled" :
-                if  (start_time < booking["end_time"] and start_time > booking["start_time"] ) or (end_time < booking["end_time"] and end_time > booking["start_time"] ):
-                    return False
+        with lock:
+            for booking in bookings:
+                if booking["room_id"] == room_id and booking["status"] != "cancelled" :
+                    if  (start_time < booking["end_time"] and start_time > booking["start_time"] ) or (end_time < booking["end_time"] and end_time > booking["start_time"] ):
+                        return False
         return True
     except Exception as e:
         raise e

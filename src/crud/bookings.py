@@ -1,12 +1,15 @@
 from fastapi import HTTPException
 from datetime import datetime
 from typing import Optional
+import threading
 
 from utils.master import convert_to_datetime, check_room_availability, get_date_difference_in_hours
 from utils.data import building
 from models.bookings import Booking
 
 from utils.data import bookings, monthly_booking_hours, booking_id_count
+
+lock = threading.Lock()
 
 class BookingsCollection:
     def __init__(self):
@@ -54,8 +57,8 @@ class BookingsCollection:
                                 "organization_id": current_user["organization_id"],
                                 "status": "booked"
                             }
-
-                            self.bookings.append(booking)
+                            with lock:
+                                self.bookings.append(booking)
                             self.monthly_booking_hours[month_key] = already_booked_hours+current_booking_hours                   
                             global booking_id_count
                             booking_id_count += 1
@@ -68,7 +71,8 @@ class BookingsCollection:
 
     async def get_all_bookings(self):
         try:
-            return self.bookings
+            with lock:
+                return self.bookings
         except Exception as e:
             raise HTTPException(status_code=400, detail="Something went wrong")
     
@@ -78,11 +82,12 @@ class BookingsCollection:
         current_user: dict
     ):
         try:
-            for booking in self.bookings:
-                if booking["id"] == booking_id and current_user["organization_id"] == booking["organization_id"]:
-                    booking["status"] = "cancelled"
-                    booking["cancelled_by"] = current_user["username"]
-                    return "Booking Cancelled"
+            with lock:
+                for booking in self.bookings:
+                    if booking["id"] == booking_id and current_user["organization_id"] == booking["organization_id"]:
+                        booking["status"] = "cancelled"
+                        booking["cancelled_by"] = current_user["username"]
+                        return "Booking Cancelled"
             
             return "Booking not found"
         except Exception:
@@ -96,13 +101,14 @@ class BookingsCollection:
     ):
         try:
             all_organization_booking = []
-            for booking in self.bookings:
-                if start_date != None and end_date != None and start_date < end_date:
-                    if current_user["organization_id"] == booking["organization_id"] and booking["start_time"] >= start_date and booking["end_time"] <= end_date:
-                        all_organization_booking.append(booking)
-                else:
-                    if current_user["organization_id"] == booking["organization_id"]:
-                        all_organization_booking.append(booking)
+            with lock:
+                for booking in self.bookings:
+                    if start_date != None and end_date != None and start_date < end_date:
+                        if current_user["organization_id"] == booking["organization_id"] and booking["start_time"] >= start_date and booking["end_time"] <= end_date:
+                            all_organization_booking.append(booking)
+                    else:
+                        if current_user["organization_id"] == booking["organization_id"]:
+                            all_organization_booking.append(booking)
             
             return all_organization_booking
         except Exception:
@@ -117,13 +123,14 @@ class BookingsCollection:
     ):
         try:
             all_organization_booking = []
-            for booking in self.bookings:
-                if start_date != None and end_date != None and start_date < end_date:
-                    if current_user["organization_id"] == booking["organization_id"] and booking["start_time"] >= start_date and booking["end_time"] <= end_date and booking["booked_by"] == str(username):
-                        all_organization_booking.append(booking)
-                else:
-                    if current_user["organization_id"] == booking["organization_id"] and booking["booked_by"] == str(username):
-                        all_organization_booking.append(booking)
+            with lock:
+                for booking in self.bookings:
+                    if start_date != None and end_date != None and start_date < end_date:
+                        if current_user["organization_id"] == booking["organization_id"] and booking["start_time"] >= start_date and booking["end_time"] <= end_date and booking["booked_by"] == str(username):
+                            all_organization_booking.append(booking)
+                    else:
+                        if current_user["organization_id"] == booking["organization_id"] and booking["booked_by"] == str(username):
+                            all_organization_booking.append(booking)
             
             return all_organization_booking
         except Exception:
