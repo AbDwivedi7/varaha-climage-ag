@@ -85,12 +85,28 @@ class BookingsCollection:
         current_user: dict
     ):
         try:
+            current_time = datetime.now()
+
             with lock:
                 for booking in self.bookings:
-                    if booking["id"] == booking_id and current_user["organization_id"] == booking["organization_id"]:
+                    if booking["id"] == booking_id and current_user["organization_id"] == booking["organization_id"] and booking["status"]=="booked" and current_time < booking["start_time"]:
+                        start_time = booking["start_time"]
+                        end_time = booking["end_time"]
+                        month_key = f"""{start_time.month}_{start_time.year}_{current_user["organization_id"]}"""
+
+                        if month_key in self.monthly_booking_hours:
+                            already_booked_hours = self.monthly_booking_hours[month_key]
+                        else:
+                            raise HTTPException(status_code=400, detail="Something went wrong")
+                        
                         booking["status"] = "cancelled"
                         booking["cancelled_by"] = current_user["username"]
+                        
+                        current_booking_hours = await get_date_difference_in_hours(start_time=start_time, end_time=end_time)
+                        self.monthly_booking_hours[month_key] = already_booked_hours - current_booking_hours 
                         return "Booking Cancelled"
+                    else:
+                        return "Not able to cancel"
             
             return "Booking not found"
         except Exception:
